@@ -14,7 +14,8 @@
 
 <br><br>
 
-<button onclick="scan()">Scan ID</button>
+<button id="scanBtn" onclick="scan()">Scan ID</button>
+<div id="status" style="margin-top:12px;color:#444"></div>
 
 <pre id="result"></pre>
 
@@ -40,32 +41,40 @@ navigator.mediaDevices.getUserMedia({
 })
 
 async function scan(){
+  const statusEl = document.getElementById("status")
+  const scanBtn = document.getElementById("scanBtn")
 
- const canvas = document.getElementById("canvas")
+  statusEl.innerText = "⏳ กำลังสแกน... กรุณารอสักครู่"
+  scanBtn.disabled = true
 
- canvas.width = video.videoWidth
- canvas.height = video.videoHeight
+  try {
+    const canvas = document.getElementById("canvas")
 
- const ctx = canvas.getContext("2d")
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
 
- ctx.drawImage(video,0,0)
+    const ctx = canvas.getContext("2d")
+    ctx.drawImage(video, 0, 0)
 
- const blob = await new Promise(r=>canvas.toBlob(r))
+    const blob = await new Promise(r => canvas.toBlob(r))
+    const form = new FormData()
+    form.append("image", blob, "frame.png")
 
- const form = new FormData()
+    const res = await fetch("/api/ocr", {
+      method: "POST",
+      body: form
+    })
 
- form.append("image",blob,"frame.png")
+    const data = await res.json()
+    document.getElementById("result").innerText = JSON.stringify(data, null, 2)
 
- const res = await fetch("/api/ocr",{
-   method:"POST",
-   body:form
- })
-
- const data = await res.json()
-
- document.getElementById("result").innerText =
- JSON.stringify(data,null,2)
-
+    statusEl.innerText = "✅ เสร็จแล้ว"
+  } catch (err) {
+    console.error(err)
+    statusEl.innerText = "❌ เกิดข้อผิดพลาด (ดู console)"
+  } finally {
+    scanBtn.disabled = false
+  }
 }
 
 </script>

@@ -1,6 +1,7 @@
 {
   "name": "thai-id-ocr",
   "version": "1.0.0",
+  "type": "module",
   "dependencies": {
     "tesseract.js": "^4.0.2",
     "formidable": "^3.5.0"

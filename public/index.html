@@ -24,9 +24,19 @@
 
 const video = document.getElementById("video")
 
-navigator.mediaDevices.getUserMedia({video:true})
-.then(stream=>{
- video.srcObject = stream
+navigator.mediaDevices.getUserMedia({
+  video: {
+    facingMode: "environment",
+    width: { ideal: 1920 },
+    height: { ideal: 1080 }
+  }
+})
+.then(stream => {
+  video.srcObject = stream
+})
+.catch(err => {
+  console.error("Camera access error:", err)
+  alert("ไม่สามารถเปิดกล้องได้ (โปรดอนุญาตให้เว็บเข้าถึงกล้อง)")
 })
 
 async function scan(){

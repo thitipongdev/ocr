@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Thai ID OCR</title>
+</head>
+
+<body>
+
+<h2>Thai ID OCR Camera</h2>
+
+<video id="video" width="420" autoplay></video>
+
+<br><br>
+
+<button onclick="scan()">Scan ID</button>
+
+<pre id="result"></pre>
+
+<canvas id="canvas" style="display:none"></canvas>
+
+<script>
+
+const video = document.getElementById("video")
+
+navigator.mediaDevices.getUserMedia({video:true})
+.then(stream=>{
+ video.srcObject = stream
+})
+
+async function scan(){
+
+ const canvas = document.getElementById("canvas")
+
+ canvas.width = video.videoWidth
+ canvas.height = video.videoHeight
+
+ const ctx = canvas.getContext("2d")
+
+ ctx.drawImage(video,0,0)
+
+ const blob = await new Promise(r=>canvas.toBlob(r))
+
+ const form = new FormData()
+
+ form.append("image",blob,"frame.png")
+
+ const res = await fetch("/api/ocr",{
+   method:"POST",
+   body:form
+ })
+
+ const data = await res.json()
+
+ document.getElementById("result").innerText =
+ JSON.stringify(data,null,2)
+
+}
+
+</script>
+
+</body>
+</html>
